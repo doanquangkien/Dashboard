@@ -1,0 +1,37 @@
+<div x-data="ordersController()">
+    <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 pb-1">
+        <button @click="currentOrderTab='all'" :class="currentOrderTab==='all' ? 'bg-gray-800 text-white' : 'bg-white text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-100">Tất cả</button>
+        <button @click="currentOrderTab='pending'" :class="currentOrderTab==='pending' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-100">Chờ TT</button>
+        <button @click="currentOrderTab='completed'" :class="currentOrderTab==='completed' ? 'bg-green-500 text-white' : 'bg-white text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-100">Hoàn thành</button>
+    </div>
+
+    <div class="relative mb-4">
+        <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+        <input type="text" x-model="searchQuery" placeholder="Tìm đơn hàng..." class="pl-9 input-field">
+    </div>
+
+    <div class="space-y-4">
+        <template x-for="order in filteredOrders" :key="order.id">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-mono text-gray-500" x-text="`#${order.id} • ${order.time}`"></span>
+                    <span :class="statusClass(order.status)" class="text-[10px] font-bold px-2 py-1 rounded" x-text="statusLabel(order.status)"></span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-lg" x-text="order.product"></h4>
+                <p class="text-sm text-gray-600"><i class="fas fa-user text-xs mr-1"></i> <span x-text="order.email"></span></p>
+                
+                <div class="bg-gray-50 rounded-lg p-3 mt-3 border border-gray-100">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Tổng tiền:</span>
+                        <span class="font-bold text-blue-600" x-text="order.total.toLocaleString() + 'đ'"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    <button class="py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold">Chi tiết</button>
+                    <button :class="order.status === 'pending' ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-500'" class="py-2.5 rounded-xl text-sm font-bold shadow-lg">Đã nhận tiền</button>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
