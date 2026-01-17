@@ -1,0 +1,31 @@
+/project-root
+│   index.html
+│
+├── css
+│   └── style.css
+│
+├── js
+│   ├── store.js
+│   └── controllers
+│       ├── dashboard.js
+│       ├── products.js
+│       ├── orders.js
+│       ├── customers.js
+│       ├── marketing.js
+│       ├── payments.js
+│       ├── delivery.js
+│       ├── communication.js
+│       ├── logs.js
+│       └── settings.js
+│
+└── views
+    ├── home.html
+    ├── products.html
+    ├── orders.html
+    ├── customers.html
+    ├── marketing.html
+    ├── payments.html
+    ├── delivery.html
+    ├── communication.html
+    ├── logs.html
+    └── settings.html
