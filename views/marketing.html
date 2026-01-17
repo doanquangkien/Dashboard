@@ -1,0 +1,25 @@
+<div x-data="marketingController()">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-gray-800">Mã giảm giá</h3>
+        <button @click="$store.modal.open('addCoupon')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">
+            <i class="fas fa-plus"></i> Tạo mới
+        </button>
+    </div>
+    <div class="space-y-3">
+        <template x-for="coupon in coupons">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <span class="font-bold text-lg tracking-wider text-purple-600" x-text="coupon.code"></span>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded ml-2">Active</span>
+                    </div>
+                    <span class="text-sm font-bold" x-text="coupon.type === 'percent' ? `-${coupon.value}%` : `-${coupon.value.toLocaleString()}đ`"></span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span x-text="`Đã dùng: ${coupon.uses}/${coupon.maxUses}`"></span>
+                    <span x-text="`Hết hạn: ${coupon.expiry}`"></span>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
