@@ -25,3 +25,16 @@ body { font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transpar
 .toggle-checkbox:checked + .toggle-label { background-color: #3B82F6; }
 
 [x-cloak] { display: none !important; }
+
+/* ... Các code cũ giữ nguyên ... */
+
+/* FIX LỖI ZOOM TRÊN MOBILE */
+@media screen and (max-width: 768px) {
+    /* Ép buộc cỡ chữ 16px trên mobile để trình duyệt không tự zoom */
+    input, 
+    select, 
+    textarea, 
+    .input-field {
+        font-size: 16px !important; 
+    }
+}
