@@ -1,0 +1,24 @@
+<div x-data="paymentsController()">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-bold text-gray-800 text-lg mb-4">Cấu hình Thanh toán (VietQR)</h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-700">Bật VietQR</p>
+                <input type="checkbox" x-model="config.enabled" class="w-6 h-6">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Ngân hàng</label>
+                <input type="text" x-model="config.bank" class="input-field">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Số tài khoản</label>
+                <input type="text" x-model="config.account" class="input-field">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Tên chủ TK</label>
+                <input type="text" x-model="config.name" class="input-field">
+            </div>
+            <button @click="saveConfig()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-2">Lưu cấu hình</button>
+        </div>
+    </div>
+</div>
