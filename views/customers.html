@@ -1,0 +1,25 @@
+<div x-data="customersController()">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-500 font-medium">
+                <tr>
+                    <th class="p-4">Khách hàng</th>
+                    <th class="p-4 text-center">Đơn</th>
+                    <th class="p-4 text-right">Chi tiêu</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <template x-for="customer in customers">
+                    <tr>
+                        <td class="p-4">
+                            <div class="font-medium text-gray-800" x-text="customer.email"></div>
+                            <div class="text-xs text-gray-400" x-text="customer.phone"></div>
+                        </td>
+                        <td class="p-4 text-center" x-text="customer.orders"></td>
+                        <td class="p-4 text-right font-bold text-green-600" x-text="customer.spent.toLocaleString() + 'đ'"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</div>
