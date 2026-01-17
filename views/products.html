@@ -1,0 +1,44 @@
+<div x-data="productsController()" x-init="init()">
+    <div class="flex justify-between items-center mb-4">
+        <div class="relative w-full max-w-xs">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+            <input type="text" x-model="searchQuery" placeholder="Tìm sản phẩm..." class="pl-9 input-field">
+        </div>
+        <div class="flex gap-2">
+            <button @click="$store.modal.open('addCategory')" class="bg-gray-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg ml-2">
+                <i class="fas fa-folder-plus"></i> <span class="hidden md:inline">Danh mục</span>
+            </button>
+            <button @click="$store.modal.open('addProduct')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg ml-2">
+                <i class="fas fa-plus"></i> <span class="hidden md:inline">Thêm SP</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <template x-for="category in filteredCategories" :key="category.id">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-gray-800" x-text="category.name"></h3>
+                    <button @click="$store.modal.open('addProduct', {categoryId: category.id})" class="text-blue-600 text-sm font-bold"><i class="fas fa-plus"></i> Thêm SP</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <template x-for="product in category.products" :key="product.id">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                            <div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">🍿</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-800" x-text="product.name"></h4>
+                                <div class="flex justify-between items-end mt-2">
+                                    <span class="font-bold text-blue-600" x-text="product.price.toLocaleString()+'đ'"></span>
+                                    <div class="flex gap-2">
+                                        <button @click="$store.modal.open('editProduct', product)" class="text-xs text-gray-500"><i class="fas fa-edit"></i></button>
+                                        <button @click="$store.modal.open('addVariant', product)" class="text-xs text-blue-600 font-bold">+ Var</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
