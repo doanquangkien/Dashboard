@@ -1,44 +1,282 @@
-<div x-data="productsController()" x-init="init()">
-    <div class="flex justify-between items-center mb-4">
-        <div class="relative w-full max-w-xs">
-            <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
-            <input type="text" x-model="searchQuery" placeholder="Tìm sản phẩm..." class="pl-9 input-field">
+<div x-data="productsController()" x-init="init()" class="min-h-screen bg-gray-50 pb-20">
+
+    <!-- ================================================================================= -->
+    <!-- VIEW 1: MANAGE LIST                                                               -->
+    <!-- ================================================================================= -->
+    <div x-show="view === 'manage'" x-transition.opacity>
+        
+        <!-- HEADER -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-4 p-4 md:p-0">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800">Sản phẩm</h1>
+            <button @click="openEditor()" class="w-full md:w-auto bg-gray-900 hover:bg-black text-white px-4 py-3 md:py-2 rounded-xl md:rounded-lg font-medium text-sm shadow-sm transition flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i> Thêm sản phẩm
+            </button>
         </div>
-        <div class="flex gap-2">
-            <button @click="$store.modal.open('addCategory')" class="bg-gray-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg ml-2">
-                <i class="fas fa-folder-plus"></i> <span class="hidden md:inline">Danh mục</span>
-            </button>
-            <button @click="$store.modal.open('addProduct')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg ml-2">
-                <i class="fas fa-plus"></i> <span class="hidden md:inline">Thêm SP</span>
-            </button>
+
+        <!-- MAIN CONTAINER -->
+        <div class="bg-white md:rounded-xl shadow-sm border-y md:border border-gray-200 overflow-hidden">
+            
+            <!-- TABS & FILTER -->
+            <div class="border-b border-gray-200">
+                <div class="flex overflow-x-auto no-scrollbar">
+                    <button @click="currentTab = 'all'" :class="currentTab === 'all' ? 'border-blue-600 text-blue-600 font-bold' : 'border-transparent text-gray-500'" class="px-4 py-3 text-sm border-b-2 transition whitespace-nowrap">Tất cả</button>
+                    <button @click="currentTab = 'active'" :class="currentTab === 'active' ? 'border-blue-600 text-blue-600 font-bold' : 'border-transparent text-gray-500'" class="px-4 py-3 text-sm border-b-2 transition whitespace-nowrap">Đang bán</button>
+                    <button @click="currentTab = 'draft'" :class="currentTab === 'draft' ? 'border-blue-600 text-blue-600 font-bold' : 'border-transparent text-gray-500'" class="px-4 py-3 text-sm border-b-2 transition whitespace-nowrap">Nháp</button>
+                </div>
+                <div class="p-3 bg-gray-50/50">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                        <input type="text" x-model="searchQuery" placeholder="Tìm kiếm sản phẩm..." class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500 bg-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- A. DESKTOP VIEW: TABLE -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 w-10"><input type="checkbox" class="rounded"></th>
+                            <th class="px-6 py-3">Sản phẩm</th>
+                            <th class="px-6 py-3">Trạng thái</th>
+                            <th class="px-6 py-3">Tồn kho</th>
+                            <th class="px-6 py-3">Bộ sưu tập</th>
+                            <th class="px-6 py-3 text-right">Giá bán</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        <template x-for="product in filteredProducts" :key="product.id">
+                            <tr class="hover:bg-gray-50 group cursor-pointer" @click="openEditor(product)">
+                                <td class="px-6 py-4" @click.stop><input type="checkbox" class="rounded"></td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-lg border border-gray-200 bg-gray-100 overflow-hidden shrink-0">
+                                            <img :src="product.images[0] || 'https://via.placeholder.com/150'" class="w-full h-full object-cover">
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-sm text-gray-900 group-hover:text-blue-600" x-text="product.title"></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span :class="product.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" class="px-2.5 py-0.5 rounded-full text-xs font-bold capitalize" x-text="product.status"></span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600" x-text="product.stock + ' tồn'"></td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="cid in product.collection_ids" :key="cid">
+                                            <span class="px-2 py-0.5 bg-gray-100 rounded text-xs border" x-text="getCollectionName(cid)"></span>
+                                        </template>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right text-sm font-bold" x-text="formatMoney(product.price)"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- B. MOBILE VIEW: CARD LIST -->
+            <div class="md:hidden bg-gray-50 divide-y divide-gray-200">
+                <template x-for="product in filteredProducts" :key="product.id">
+                    <div class="bg-white p-4 flex gap-3 active:bg-gray-50" @click="openEditor(product)">
+                        <div class="w-20 h-20 rounded-lg border border-gray-200 bg-gray-100 overflow-hidden shrink-0 relative">
+                            <img :src="product.images[0] || 'https://via.placeholder.com/150'" class="w-full h-full object-cover">
+                            <div x-show="product.images.length > 1" class="absolute bottom-0 right-0 bg-black/50 text-white text-[9px] px-1 rounded-tl">+<span x-text="product.images.length-1"></span></div>
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-900 line-clamp-2" x-text="product.title"></h3>
+                                <div class="mt-1 flex items-center gap-2">
+                                    <span :class="product.status === 'active' ? 'text-green-600 bg-green-50 border-green-200' : 'text-gray-500 bg-gray-100 border-gray-200'" class="text-[10px] px-1.5 py-0.5 rounded border font-medium uppercase" x-text="product.status"></span>
+                                    <span class="text-[10px] text-gray-500">Kho: <span x-text="product.stock"></span></span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-end mt-2">
+                                <span class="font-bold text-blue-600" x-text="formatMoney(product.price)"></span>
+                                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                
+                <div x-show="filteredProducts.length === 0" class="p-8 text-center text-gray-400">
+                    <i class="fas fa-box-open text-3xl mb-2"></i>
+                    <p class="text-sm">Chưa có sản phẩm nào</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div class="space-y-6">
-        <template x-for="category in filteredCategories" :key="category.id">
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-bold text-gray-800" x-text="category.name"></h3>
-                    <button @click="$store.modal.open('addProduct', {categoryId: category.id})" class="text-blue-600 text-sm font-bold"><i class="fas fa-plus"></i> Thêm SP</button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <template x-for="product in category.products" :key="product.id">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                            <div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">🍿</div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-gray-800" x-text="product.name"></h4>
-                                <div class="flex justify-between items-end mt-2">
-                                    <span class="font-bold text-blue-600" x-text="product.price.toLocaleString()+'đ'"></span>
-                                    <div class="flex gap-2">
-                                        <button @click="$store.modal.open('editProduct', product)" class="text-xs text-gray-500"><i class="fas fa-edit"></i></button>
-                                        <button @click="$store.modal.open('addVariant', product)" class="text-xs text-blue-600 font-bold">+ Var</button>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- ================================================================================= -->
+    <!-- VIEW 2: PRODUCT EDITOR                                                            -->
+    <!-- ================================================================================= -->
+    <div x-show="view === 'editor'" style="display: none;" x-transition.opacity>
+        
+        <!-- EDITOR HEADER -->
+        <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-200 md:border-none md:bg-transparent px-4 py-3 md:py-4 md:px-0 mb-4 md:mb-6 flex justify-between items-center shadow-sm md:shadow-none">
+            <div class="flex items-center gap-3">
+                <button @click="cancelEditor()" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="text-lg font-bold text-gray-800 line-clamp-1" x-text="formData.id ? 'Sửa sản phẩm' : 'Thêm mới'"></h1>
+            </div>
+            <div class="hidden md:flex gap-3">
+                <button x-show="formData.id" @click="deleteProduct(formData.id)" class="text-red-600 font-bold px-3 py-2 hover:bg-red-50 rounded-lg text-sm">Xóa</button>
+                <button @click="saveProduct()" class="bg-gray-900 text-white px-5 py-2 rounded-lg font-bold text-sm shadow-lg hover:bg-black">Lưu lại</button>
+            </div>
+            <button @click="saveProduct()" class="md:hidden text-blue-600 font-bold text-sm">Lưu</button>
+        </div>
+
+        <!-- FORM CONTENT -->
+        <div class="px-4 md:px-0 pb-24 md:pb-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- LEFT -->
+            <div class="lg:col-span-2 space-y-4 md:space-y-6">
+                <!-- Info -->
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Tên sản phẩm</label>
+                            <input type="text" x-model="formData.title" class="input-field w-full p-2.5 border rounded-lg" placeholder="Ví dụ: Netflix Premium...">
                         </div>
-                    </template>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Mô tả</label>
+                            <textarea x-model="formData.desc" rows="5" class="input-field w-full p-2.5 border rounded-lg text-sm" placeholder="Mô tả chi tiết..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media -->
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-sm font-bold text-gray-700">Hình ảnh</label>
+                        <button @click="toggleUrlInput()" class="text-xs text-blue-600 font-bold hover:underline">
+                            <i class="fas fa-link mr-1"></i>Thêm từ URL
+                        </button>
+                    </div>
+
+                    <div x-show="showUrlInput" class="mb-3 flex gap-2" x-transition>
+                        <input type="text" id="urlInputRef" x-model="tempImageUrl" @keydown.enter="addImageFromUrl()" placeholder="Link ảnh..." class="flex-1 text-sm border border-blue-300 rounded-lg px-3 py-2 outline-none">
+                        <button @click="addImageFromUrl()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-bold">Thêm</button>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                        <template x-for="(img, index) in formData.images" :key="index">
+                            <div class="relative aspect-square rounded-lg border overflow-hidden group">
+                                <img :src="img" class="w-full h-full object-cover">
+                                <button @click="removeImage(index)" class="absolute top-1 right-1 bg-white/80 text-red-500 p-1 rounded-full shadow-sm">
+                                    <i class="fas fa-trash-alt text-xs w-4 h-4 flex items-center justify-center"></i>
+                                </button>
+                            </div>
+                        </template>
+                        <div class="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer relative hover:bg-gray-50">
+                            <input type="file" multiple accept="image/*" class="absolute inset-0 opacity-0 z-10" @change="handleImageUpload">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-sm font-bold text-gray-800 mb-4">Giá bán</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-gray-600">Giá bán</label>
+                            <input type="number" x-model="formData.price" class="w-full mt-1 p-2 border rounded-lg font-bold">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-600">Giá gốc (Gạch)</label>
+                            <input type="number" x-model="formData.compare_price" class="w-full mt-1 p-2 border rounded-lg">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VARIANTS (ĐÃ KHÔI PHỤC) -->
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-gray-800">Biến thể</h3>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="has_variants" :checked="formData.has_variants" @change="toggleVariants()" class="w-4 h-4 text-blue-600 rounded">
+                            <label for="has_variants" class="text-sm text-gray-600 select-none cursor-pointer">Nhiều tùy chọn</label>
+                        </div>
+                    </div>
+
+                    <div x-show="formData.has_variants" x-transition>
+                        <hr class="border-gray-100 mb-4">
+                        <div class="space-y-3">
+                            <template x-for="(variant, index) in formData.variants" :key="variant.id">
+                                <div class="flex gap-2 items-end">
+                                    <div class="flex-1">
+                                        <label class="text-[10px] text-gray-500 font-bold uppercase mb-1" x-show="index===0">Tên</label>
+                                        <input type="text" x-model="variant.title" placeholder="VD: Size L" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                    </div>
+                                    <div class="w-24 md:w-32">
+                                        <label class="text-[10px] text-gray-500 font-bold uppercase mb-1" x-show="index===0">Giá</label>
+                                        <input type="number" x-model="variant.price" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                    </div>
+                                    <button @click="removeVariant(index)" class="p-2 mb-0.5 text-gray-400 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </template>
+                        </div>
+                        <button @click="addVariant()" class="mt-4 text-xs text-blue-600 font-bold uppercase border border-blue-200 px-3 py-1.5 rounded bg-blue-50">+ Thêm dòng</button>
+                    </div>
                 </div>
             </div>
-        </template>
+
+            <!-- RIGHT -->
+            <div class="lg:col-span-1 space-y-4 md:space-y-6">
+                <!-- Status -->
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Trạng thái</label>
+                    <select x-model="formData.status" class="w-full p-2 border rounded-lg text-sm bg-white">
+                        <option value="active">Active (Đang bán)</option>
+                        <option value="draft">Draft (Nháp)</option>
+                    </select>
+                </div>
+
+                <!-- Collections (Quick Add & Delete) -->
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Bộ sưu tập</label>
+                        <button @click="isCreatingCollection = !isCreatingCollection" class="text-xs text-blue-600 font-bold hover:underline">+ Tạo mới</button>
+                    </div>
+
+                    <div x-show="isCreatingCollection" class="mb-3 flex gap-1" x-transition>
+                        <input type="text" x-model="newCollectionName" @keydown.enter="createCollection()" placeholder="Tên danh mục..." class="flex-1 text-xs border border-blue-300 rounded px-2 py-1 outline-none">
+                        <button @click="createCollection()" class="bg-blue-600 text-white px-2 rounded text-xs">OK</button>
+                    </div>
+
+                    <!-- List Collections with Delete Button -->
+                    <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-1 bg-gray-50">
+                        <template x-for="col in collections" :key="col.id">
+                            <div class="flex items-center justify-between hover:bg-white rounded group px-1 transition">
+                                <label class="flex items-center gap-3 p-2 rounded cursor-pointer flex-1">
+                                    <input type="checkbox" :checked="formData.collection_ids.includes(col.id)" @change="toggleCollection(col.id)" class="rounded text-blue-600">
+                                    <span class="text-sm font-medium text-gray-700" x-text="col.name"></span>
+                                </label>
+                                <!-- Delete Button -->
+                                <button @click="deleteCollection(col.id)" class="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition" title="Xóa danh mục">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </template>
+                        <div x-show="collections.length === 0" class="p-2 text-center text-xs text-gray-400">Chưa có danh mục nào.</div>
+                    </div>
+                </div>
+
+                <!-- Stock -->
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+                     <label class="text-xs font-bold text-gray-500 uppercase mb-2 block">Kho hàng</label>
+                     <input type="number" x-model="formData.stock" class="w-full p-2 border rounded-lg">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Footer -->
+        <div x-show="formData.id" class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-40 flex justify-center">
+            <button @click="deleteProduct(formData.id)" class="text-red-600 font-bold text-sm w-full py-2 border border-red-200 rounded-lg">Xóa sản phẩm này</button>
+        </div>
     </div>
 </div>

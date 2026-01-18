@@ -1,23 +1,10 @@
 <div x-data="logsController()">
-    <div class="bg-gray-900 p-4 rounded-xl font-mono text-xs h-[400px] overflow-y-auto text-gray-100">
-        <template x-for="log in logs" :key="log.time">
-            <div class="mb-1 flex items-start gap-2">
-                
-                <!-- Time -->
-                <span class="text-gray-500 shrink-0"
-                      x-text="`[${log.time}]`"></span>
-
-                <!-- Action -->
-                <span class="text-white flex-1"
-                      x-text="log.action"></span>
-
-                <!-- View button -->
-                <button
-                    @click="$store.modal.open('viewLog', log)"
-                    class="text-blue-400 hover:text-blue-300 transition">
-                    [View]
-                </button>
-
+    <div class="bg-gray-900 text-green-400 p-4 rounded-xl font-mono text-xs h-[400px] overflow-y-auto">
+        <template x-for="log in logs">
+            <div class="mb-1">
+                <span class="text-gray-500" x-text="`[${log.time}]`"></span> 
+                <span x-text="log.action"></span>
+                <button @click="$store.modal.open('viewLog', log)" class="text-blue-300 ml-2">[View]</button>
             </div>
         </template>
     </div>
