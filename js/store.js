@@ -1,4 +1,22 @@
 document.addEventListener('alpine:init', () => {
+
+    
+    // --- THÊM MỚI: AUTH STORE ---
+    Alpine.store('auth', {
+        // Kiểm tra xem trong bộ nhớ có token chưa
+        isLoggedIn: !!localStorage.getItem('admin_token'),
+
+        logout() {
+            if(confirm('Bạn chắc chắn muốn đăng xuất?')) {
+                localStorage.removeItem('admin_token');
+                this.isLoggedIn = false;
+                // Reset lại trang về Home để tránh lỗi view cũ
+                Alpine.store('app').setTab('home'); 
+            }
+        }
+    });
+
+
     // APP STORE: Quản lý Tab và Sidebar
     Alpine.store('app', {
         sidebarOpen: false,
